@@ -1,0 +1,13 @@
+<ActionBar title="Attendance" class="action-bar">
+</ActionBar>
+
+<FlexboxLayout flexDirection="column" class="page">
+    <BarcodeScanner height="300" formats="QR_CODE, EAN_13" beepOnScan="true" reportDuplicates="true" preferFrontCamera="false"
+        (scanResult)="onScanResult($event)">
+    </BarcodeScanner>
+
+    <Button text="SCAN" (tap)="scanBarcode($event)"></Button>
+
+    <Label class="h3 p-15" [text]="twoway" textWrap="true"></Label>
+
+</FlexboxLayout>

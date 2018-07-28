@@ -6,8 +6,10 @@ import { AppComponent } from "./app.component";
 import { ItemService } from "./item/item.service";
 import { ItemsComponent } from "./item/items.component";
 import { ItemDetailComponent } from "./item/item-detail.component";
+import { UserDetailComponent } from './user/user-detail.component';
 
 import { BarcodeScanner } from 'nativescript-barcodescanner';
+import { SqliteService } from './services/sqlite.service';
 
 // Uncomment and add to NgModule imports if you need to use two-way binding
 // import { NativeScriptFormsModule } from "nativescript-angular/forms";
@@ -26,11 +28,13 @@ import { BarcodeScanner } from 'nativescript-barcodescanner';
     declarations: [
         AppComponent,
         ItemsComponent,
-        ItemDetailComponent
+        ItemDetailComponent,
+        UserDetailComponent
     ],
     providers: [
         ItemService,
-        BarcodeScanner
+        BarcodeScanner,
+        SqliteService
     ],
     schemas: [
         NO_ERRORS_SCHEMA

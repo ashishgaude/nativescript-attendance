@@ -1,6 +1,8 @@
 import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
 
 import { BarcodeScanner } from 'nativescript-barcodescanner';
+import { SqliteService } from '../services/sqlite.service';
 
 @Component({
     selector: "ns-items",
@@ -10,13 +12,12 @@ import { BarcodeScanner } from 'nativescript-barcodescanner';
 export class ItemsComponent implements OnInit {
     public twoway = "Two way bound label";
 
-    // This pattern makes use of Angular’s dependency injection implementation to inject an instance of the ItemService service into this class. 
-    // Angular knows about this service because it is included in your app’s main NgModule, defined in app.module.ts.
-    constructor(private barcodeScanner: BarcodeScanner) { }
+    private database: any;
+    public people: Array<any>;
+
+    constructor(private router: Router, private barcodeScanner: BarcodeScanner, private sqliteService: SqliteService) { }
 
     ngOnInit(): void {
-        // this.items = this.itemService.getItems();
-        console.log("ng on int==============================");
         this.barcodeScanner.available().then((available) => {
             if (available) {
                 this.barcodeScanner.hasCameraPermission()
@@ -31,35 +32,62 @@ export class ItemsComponent implements OnInit {
         });
     }
 
-    onTap() {
-        this.scanBarcode();
-    }
+    public scanBarcode() {
+        return new Promise((resolve, reject) => {
+            let scan = () => {
+                console.log("------ in scan function -------");
+                this.barcodeScanner
+                    .scan({
+                        formats: "QR_CODE, EAN_13",
+                        beepOnScan: true,
+                        reportDuplicates: true,
+                        preferFrontCamera: false
+                    })
+                    .then(result => {
+                        let data: any = JSON.parse(result.text);
+                        console.log("Scanner Result:", JSON.stringify(data));
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+            };
 
-    onScanResult(res) {
-        console.log("result:::", res);
-    }
-
-    scanBarcode() {
-
-        let scan = () => {
-            this.barcodeScanner.scan({
-                formats: "QR_CODE, EAN_13",
-                beepOnScan: true,
-                reportDuplicates: true,
-                preferFrontCamera: false
-            })
-                .then(result => {
-                    this.twoway = JSON.stringify(result);
-                    console.log(JSON.stringify(result))
+            this.barcodeScanner.hasCameraPermission()
+                .then(granted => {
+                    if (granted) {
+                        scan()
+                    } else {
+                        console.log("Permission denied");
+                        reject("Camera Permissions denied!");
+                    }
                 })
-                .catch(error => console.log(error));
-        };
+                .catch(() => {
+                    this.barcodeScanner.requestCameraPermission()
+                        .then(() => scan());
+                });
+        })
+    }
 
-        this.barcodeScanner.hasCameraPermission()
-            .then(granted => granted ? scan() : console.log("Permission denied"))
-            .catch(() => {
-                this.barcodeScanner.requestCameraPermission()
-                    .then(() => scan());
-            });
+    public registerNewUser() {
+        this.scanBarcode()
+            .then(data => {
+                console.log('data in regiser user::::', data);
+                let result: any = data;
+                let query = "INSERT INTO Users (UID, Name, Branch, DateOfInitiation) VALUES (?, ?, ?, ?)";
+                let dataArray = [result.uId, result.name, result.branch, result.dateOfInitiation];
+                return this.sqliteService.insert(query, dataArray);
+            })
+            .then(id => {
+                console.log("Registered new user with id:", id);
+            })
+            .catch(error => {
+                console.log("Error Registering user:", error);
+            })
+    }
+
+    public showAllUsers() {
+        this.router.navigate(["/users"]);
     }
 }

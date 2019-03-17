@@ -1,0 +1,18 @@
+<ActionBar title="Attendance" class="action-bar">
+    <ActionItem text="ALL USERS" ios.position="left" (tap)="showAllUsers()"></ActionItem>
+    <ActionItem text="New User" ios.position="left" (tap)="registerNewUser()"></ActionItem>
+</ActionBar>
+
+
+<BarcodeScanner height="300" formats="QR_CODE, EAN_13" beepOnScan="true" reportDuplicates="true" preferFrontCamera="false"
+    (scanResult)="onScanResult($event)">
+</BarcodeScanner>
+
+
+<DockLayout stretchLastChild="true">
+    <Button dock="left" text="Export To xls" style="background-color: #0099CC; "></Button>
+    <Button dock="right" text="Generate Report" style="background-color: #8C489F; "></Button>
+    <Button dock="bottom" text="Todays Count" style="background-color: #AA0078; "></Button>
+    <Button dock="top" text="top" style="background-color: #B3B3D7; "></Button>
+    <Button text="SCAN" (tap)="scanBarcode($event)" style="background-color: #CCFFFF; "></Button>
+</DockLayout>
